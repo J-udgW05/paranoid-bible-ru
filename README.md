@@ -47,7 +47,6 @@ paranoid-bible-ru/
 │   ├── privacy.html       # Политика конфиденциальности и Zero-Log декларация
 │   ├── disclaimer.html    # Отказ от ответственности и этический регламент
 │   ├── canary.html        # Warrant Canary (гарантия независимости и отсутствия бэкдоров)
-│   ├── contacts.html      # Защищенные каналы связи и публичный PGP-ключ
 │   ├── license.html       # Лицензия CC BY-NC-SA 4.0 и условия использования
 │   ├── sw.js              # Service Worker (Cache-First, v14)
 │   ├── manifest.json      # PWA Web App Manifest
