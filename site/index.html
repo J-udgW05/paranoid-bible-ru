@@ -1033,12 +1033,13 @@
             background: var(--color-accent);
             color: #06222b;
             border: 1px solid var(--color-accent);
-            border-radius: 4px;
+            border-radius: 6px;
             text-decoration: none;
             line-height: 1;
             cursor: pointer;
             z-index: 30;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+            transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
         }
 
         .to-top:hover {
@@ -1046,6 +1047,22 @@
             border-color: var(--color-accent-hover);
             color: #000;
             transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+        }
+
+        /* Светлая тема для кнопки "Наверх" */
+        :root[data-theme="light"] .to-top {
+            background: #ffffff;
+            color: var(--color-accent);
+            border: 1px solid var(--color-border);
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+        }
+
+        :root[data-theme="light"] .to-top:hover {
+            background: var(--color-accent);
+            color: #ffffff;
+            border-color: var(--color-accent);
+            box-shadow: 0 6px 18px rgba(0, 119, 153, 0.25);
         }
 
         .to-top:focus-visible {
@@ -1056,6 +1073,12 @@
         .to-top svg {
             width: 18px;
             height: 18px;
+            stroke-width: 2.2;
+            transition: transform 0.15s ease;
+        }
+
+        .to-top:hover svg {
+            transform: translateY(-1px);
         }
 
         @media (max-width: 900px) {

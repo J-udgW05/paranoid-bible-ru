@@ -1,7 +1,7 @@
 /* Библия Параноика - Offline Service Worker (Cache-First) */
 'use strict';
 
-var CACHE_NAME = 'paranoid-bible-v16';
+var CACHE_NAME = 'paranoid-bible-v17';
 var ASSETS = [
     './',
     './index.html',
