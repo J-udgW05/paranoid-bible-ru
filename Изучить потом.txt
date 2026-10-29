@@ -1,0 +1,77 @@
+Created check_links.py
+Ran check all provided URLs
+Created fix_links.py
+Ran test replacement URLs and DoH for ntc.party
+Created inspect_pages.py
+Ran inspect pages for exact links
+Created verify_clean_links.py
+Ran verify all cleaned URLs return 200 OK
+
+Я прогнал автоматическую проверку всех ссылок прямыми HTTP-запросами (скриптом [`verify_clean_links.py`](file:///C:/Users/Hser/.gemini/antigravity/brain/a9fa4ead-e0e1-419b-a735-69bbcab671fb/scratch/verify_clean_links.py)). 
+
+### 🔍 Что показала проверка предыдущего списка (исправленные ссылки):
+1. **`ntc.party`** — сейчас не отдает `A`-запись по DNS (проблема с доменом у регистратора). Заменен на прямые рабочие репозитории главных инструментов обхода ТСПУ/DPI с подробными мануалами на русском: [**Zapret (`bol-van`)**](https://github.com/bol-van/zapret) и [**GoodbyeDPI (`ValdikSS`)**](https://github.com/ValdikSS/GoodbyeDPI), а также портал [**Роскомсвободы**](https://roskomsvoboda.org/ru/) (`[200 OK]`).
+2. **`stisc.gov.md/ro/ghiduri-de-securitate-cibernetica`** — отдавал `404` (раздел переехал на короткий адрес). Исправлено на рабочий URL: [**https://stisc.gov.md/ro/ghiduri**](https://stisc.gov.md/ro/ghiduri) (`[200 OK]`).
+3. **`digitalfirstaid.org/en/`** — английская версия находится в корне домена без `/en/`. Исправлено на [**https://digitalfirstaid.org/**](https://digitalfirstaid.org/) (`[200 OK]`), русская версия [**https://digitalfirstaid.org/ru/**](https://digitalfirstaid.org/ru/) (`[200 OK]`).
+4. **`howto.disroot.org`** — поддомен вики сейчас отдает `500 Internal Server Error`. Заменен на основной портал [**https://disroot.org/**](https://disroot.org/) (`[200 OK]`) и европейскую коалицию цифровых прав [**https://edri.org/**](https://edri.org/) (`[200 OK]`).
+5. **`digitale-gesellschaft.ch/uber-uns/digitale-selbstverteidigung/`** — страница перенесена в раздел справочников. Исправлено на прямые рабочие разделы: [**https://www.digitale-gesellschaft.ch/ratgeber/**](https://www.digitale-gesellschaft.ch/ratgeber/) и сравнение мессенджеров [**https://www.digitale-gesellschaft.ch/messenger**](https://www.digitale-gesellschaft.ch/messenger) (`[200 OK]`).
+6. **`freedom.press/training/`** — перенаправлял на новый раздел цифровой безопасности. Заменен на прямой конечный URL: [**https://freedom.press/digisec/**](https://freedom.press/digisec/) (`[200 OK]`).
+7. **`nadiyno.org`** — стоит жесткая анти-DDoS защита (отдает `429` при автоматических запросах без браузерной капчи), поэтому для Украины оставлены открытые без ограничений [**https://dslua.org/**](https://dslua.org/) (`[200 OK]`) и [**https://dss380.org/**](https://dss380.org/) (`[200 OK]`).
+
+---
+
+### ✅ Полный реестр проверенных рабочих ссылок (36 из 36 — статус `[200 OK]`)
+
+#### 🇷🇺 1. Россия
+- `[200 OK]` **Zapret (Глубокое руководство по обходу DPI/ТСПУ на уровне пакетов):** [https://github.com/bol-van/zapret](https://github.com/bol-van/zapret)
+- `[200 OK]` **GoodbyeDPI (Справочник по пассивному/активному DPI и ссылки на аналоги):** [https://github.com/ValdikSS/GoodbyeDPI](https://github.com/ValdikSS/GoodbyeDPI)
+- `[200 OK]` **Документация Amnezia (Современные протоколы Xray Reality, AmneziaWG, Cloak):** [https://docs.amnezia.org/ru/](https://docs.amnezia.org/ru/)
+- `[200 OK]` **«Первый отдел» (Инструкции по защите устройств при обысках и на границе):** [https://dept.one/](https://dept.one/)
+- `[200 OK]` **Теплица социальных технологий — Раздел «Кибербезопасность»:** [https://te-st.org/security/](https://te-st.org/security/)
+- `[200 OK]` **Роскомсвобода (Цифровые права, обход блокировок и разбор слежки):** [https://roskomsvoboda.org/ru/](https://roskomsvoboda.org/ru/)
+
+#### 🇺🇦 2. Украина
+- `[200 OK]` **Лабораторія цифрової безпеки (Digital Security Lab Ukraine):** [https://dslua.org/](https://dslua.org/)
+- `[200 OK]` **Digital Security School 380 (DSS380 — чек-листы и гигиена безопасности):** [https://dss380.org/](https://dss380.org/)
+
+#### 🇲🇩 3. Молдова
+- `[200 OK]` **STISC Moldova — Сборник официальных руководств по кибербезопасности:** [https://stisc.gov.md/ro/ghiduri](https://stisc.gov.md/ro/ghiduri)
+- `[200 OK]` **Агентство кибербезопасности Республики Молдова (ASC / NCSC):** [https://ncsc.md/](https://ncsc.md/)
+- `[200 OK]` **Promo-LEX (Права человека и защита персональных данных в РМ):** [https://promolex.md/](https://promolex.md/)
+
+#### 🇪🇺 4. Европейский Союз
+- `[200 OK]` **Security in a Box (Русская версия — полное пособие по OPSEC):** [https://securityinabox.org/ru/](https://securityinabox.org/ru/)
+- `[200 OK]` **Security in a Box (Английская версия):** [https://securityinabox.org/en/](https://securityinabox.org/en/)
+- `[200 OK]` **Digital First Aid Kit (Русская версия — аптечка при взломе и слежке):** [https://digitalfirstaid.org/ru/](https://digitalfirstaid.org/ru/)
+- `[200 OK]` **Digital First Aid Kit (Английская версия):** [https://digitalfirstaid.org/](https://digitalfirstaid.org/)
+- `[200 OK]` **European Digital Rights (EDRi — аналитика слежки, Chat Control, биометрии в ЕС):** [https://edri.org/](https://edri.org/)
+- `[200 OK]` **Disroot.org (Платформа децентрализованных и приватных сервисов ЕС):** [https://disroot.org/](https://disroot.org/)
+
+#### 🇨🇳 5. Китай
+- `[200 OK]` **GFW Report (Технический разбор блокировок GFW, почему устарели старые прокси):** [https://gfw.report/](https://gfw.report/)
+- `[200 OK]` **Net4People BBS (Форум инженеров по обходу цензуры в Китае, Иране и РФ):** [https://github.com/net4people/bbs/issues](https://github.com/net4people/bbs/issues)
+- `[200 OK]` **Блог «Program-Think» (编程随想 — легендарное китайское пособие по анонимности):** [https://program-think.blogspot.com/](https://program-think.blogspot.com/)
+- `[200 OK]` **Архив Program-Think на GitHub:** [https://github.com/programthink](https://github.com/programthink)
+
+#### 🇺🇸 6. США
+- `[200 OK]` **Digital Defense / Personal Security Checklist (Веб-версия 300+ советов):** [https://digital-defense.io/](https://digital-defense.io/)
+- `[200 OK]` **Personal Security Checklist (GitHub-репозиторий Lissy93):** [https://github.com/Lissy93/personal-security-checklist](https://github.com/Lissy93/personal-security-checklist)
+- `[200 OK]` **Freedom of the Press Foundation — Digital Security Guides:** [https://freedom.press/digisec/](https://freedom.press/digisec/)
+- `[200 OK]` **Activist Checklist (Практические чек-листы по защите смартфонов и OPSEC):** [https://activistchecklist.org/](https://activistchecklist.org/)
+- `[200 OK]` **Riseup Security Guide (На русском — радикальная защита от слежки):** [https://riseup.net/ru/security](https://riseup.net/ru/security)
+
+#### 🇩🇪 7. Германия
+- `[200 OK]` **Kuketz IT-Security — Empfehlungsecke («Уголок рекомендаций» по приватному ПО):** [https://www.kuketz-blog.de/empfehlungsecke/](https://www.kuketz-blog.de/empfehlungsecke/)
+- `[200 OK]` **Kuketz Messenger-Matrix (Детальная таблица сравнения безопасности мессенджеров):** [https://www.messenger-matrix.de/](https://www.messenger-matrix.de/)
+- `[200 OK]` **Digitalcourage — Digitale Selbstverteidigung (Цифровая самооборона в ФРГ):** [https://digitalcourage.de/digitale-selbstverteidigung](https://digitalcourage.de/digitale-selbstverteidigung)
+
+#### 🇨🇭 8. Швейцария
+- `[200 OK]` **Digitale Gesellschaft Schweiz — Ratgeber (Справочник по цифровой самообороне):** [https://www.digitale-gesellschaft.ch/ratgeber/](https://www.digitale-gesellschaft.ch/ratgeber/)
+- `[200 OK]` **Digitale Gesellschaft — Аудит и оценка защищенных мессенджеров:** [https://www.digitale-gesellschaft.ch/messenger](https://www.digitale-gesellschaft.ch/messenger)
+- `[200 OK]` **Chaos Computer Club Schweiz (CCC-CH):** [https://ccc-ch.ch/](https://ccc-ch.ch/)
+
+#### 🇧🇷 9. Бразилия
+- `[200 OK]` **Guia de Autodefesa Digital (Бразильское пособие по цифровой самообороне):** [https://autodefesa.org/](https://autodefesa.org/)
+- `[200 OK]` **Rede Antivigilância (Коалиция против слежки и цензуры в Бразилии):** [https://antivigilancia.org/](https://antivigilancia.org/)
+- `[200 OK]` **Coding Rights (Гайды по приватности, защите от биометрии и утечек):** [https://codingrights.org/en/](https://codingrights.org/en/)
+- `[200 OK]` **SaferNet Brasil (Руководства по кибербезопасности и защите прав в сети):** [https://new.safernet.org.br/](https://new.safernet.org.br/)

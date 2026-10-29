@@ -378,6 +378,24 @@
             font-family: var(--font-mono);
             color: var(--color-text-muted);
             min-width: 0;
+            cursor: pointer;
+            transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+            user-select: none;
+        }
+
+        .sidebar-current:hover {
+            border-color: var(--color-accent);
+            background: var(--color-panel-inner);
+            color: var(--color-text);
+        }
+
+        .sidebar-current:active {
+            transform: scale(0.98);
+        }
+
+        .sidebar-current:focus-visible {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
         }
 
         .sidebar-current-prefix {
@@ -394,6 +412,35 @@
             white-space: nowrap;
             color: var(--color-text);
             font-weight: 500;
+        }
+
+        .sidebar-current-icon {
+            flex-shrink: 0;
+            margin-left: auto;
+            opacity: 0.55;
+            color: var(--color-accent);
+            transition: opacity 0.15s ease, transform 0.2s ease;
+        }
+
+        .sidebar-current:hover .sidebar-current-icon {
+            opacity: 1;
+            transform: scale(1.15);
+        }
+
+        .sidebar-nav .nav-link.pulse-highlight,
+        .mobile-menu-nav .nav-link.pulse-highlight {
+            animation: navPulse 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes navPulse {
+            0% {
+                background: var(--color-accent-dim-hover);
+                box-shadow: inset 0 0 0 1px var(--color-accent), 0 0 12px var(--color-accent-dim-hover);
+            }
+            100% {
+                background: var(--color-accent-dim);
+                box-shadow: none;
+            }
         }
 
         .sidebar-search-wrap {
@@ -1562,9 +1609,10 @@
                     </svg>
                     <span>Содержание</span>
                 </div>
-                <div class="sidebar-current" id="sidebar-current-tracker" aria-live="polite" title="Текущий раздел">
+                <div class="sidebar-current" id="sidebar-current-tracker" role="button" tabindex="0" aria-live="polite" title="Нажмите, чтобы показать текущую главу в списке">
                     <span class="sidebar-current-prefix">ЧТЕНИЕ:</span>
                     <span class="sidebar-current-text" id="sidebar-current-text">01. Вступление</span>
+                    <svg class="sidebar-current-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
                 </div>
             </div>
  <div class="sidebar-search-wrap">
@@ -21568,69 +21616,98 @@ Loss Prevention) - системы, которые ловят утечку на �
     var currentActiveId = null;
     var isNavJumping = false;
     var jumpTimer = null;
-    var isSidebarHovered = false;
-    var hoverResetTimer = null;
+    var isUserScrollingNav = false;
+    var userScrollTimer = null;
 
-    // Защита от перебивания скролла пользователя в оглавлении (Hover Lock)
-    if (sidebarNav) {
-        sidebarNav.addEventListener('mouseenter', function () {
-            isSidebarHovered = true;
-        });
-        sidebarNav.addEventListener('mouseleave', function () {
-            isSidebarHovered = false;
-        });
-        sidebarNav.addEventListener('wheel', function () {
-            isSidebarHovered = true;
-            clearTimeout(hoverResetTimer);
-            hoverResetTimer = setTimeout(function () {
-                isSidebarHovered = false;
-            }, 1800);
-        }, { passive: true });
-        sidebarNav.addEventListener('touchstart', function () {
-            isSidebarHovered = true;
-        }, { passive: true });
-        sidebarNav.addEventListener('touchend', function () {
-            clearTimeout(hoverResetTimer);
-            hoverResetTimer = setTimeout(function () {
-                isSidebarHovered = false;
-            }, 1800);
-        }, { passive: true });
+    // Отслеживание активной РУЧНОЙ прокрутки оглавления пользователем
+    // Автоскролл временно уступает человеку на 2.5 секунды, затем плавно возвращается к чтению
+    function registerManualNavScroll(navEl) {
+        if (!navEl) return;
+        function onManualScroll() {
+            isUserScrollingNav = true;
+            clearTimeout(userScrollTimer);
+            userScrollTimer = setTimeout(function () {
+                isUserScrollingNav = false;
+                if (currentActiveId && !isNavJumping) {
+                    revealActive(currentActiveId, false);
+                }
+            }, 2500);
+        }
+        navEl.addEventListener('wheel', onManualScroll, { passive: true });
+        navEl.addEventListener('touchmove', onManualScroll, { passive: true });
     }
 
-    // Умная центровка активного пункта в панели без резких скачков
+    registerManualNavScroll(sidebarNav);
+    registerManualNavScroll(mobileNav);
+
+    // Умный центрирующий автоскролл
     function revealInNav(targetNav, linkEl, force) {
         if (!targetNav || !linkEl) return;
         if (targetNav.scrollHeight <= targetNav.clientHeight + 4) return;
 
+        // Точное инвариантное вычисление вертикальной позиции внутри контейнера
         var navRect = targetNav.getBoundingClientRect();
         var linkRect = linkEl.getBoundingClientRect();
+        var linkTop = linkRect.top - navRect.top + targetNav.scrollTop;
+        var linkHeight = linkEl.offsetHeight || 32;
 
-        var topComfort = navRect.top + (targetNav.clientHeight * 0.20);
-        var bottomComfort = navRect.bottom - (targetNav.clientHeight * 0.25);
+        var navScrollTop = targetNav.scrollTop;
+        var navClientHeight = targetNav.clientHeight;
 
-        if (force) {
-            var centerOffset = (linkEl.offsetTop - (targetNav.clientHeight / 2)) + (linkEl.clientHeight / 2);
-            targetNav.scrollTop = Math.max(0, centerOffset);
-            return;
-        }
+        // Зона комфорта: центральные 50% высоты панели (25% сверху и снизу)
+        var comfortTop = navScrollTop + (navClientHeight * 0.25);
+        var comfortBottom = navScrollTop + navClientHeight - (navClientHeight * 0.25) - linkHeight;
 
-        if (linkRect.top < topComfort) {
-            targetNav.scrollTop -= (topComfort - linkRect.top + 16);
-        } else if (linkRect.bottom > bottomComfort) {
-            targetNav.scrollTop += (linkRect.bottom - bottomComfort + 16);
+        // Если принудительно (клик по трекеру/якорю) или ссылка вышла за пределы комфортной зоны
+        if (force || linkTop < comfortTop || linkTop > comfortBottom) {
+            var targetCenter = linkTop - (navClientHeight / 2) + (linkHeight / 2);
+            var maxScroll = targetNav.scrollHeight - navClientHeight;
+            var clamped = Math.max(0, Math.min(maxScroll, targetCenter));
+
+            var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var behavior = (prefersReduced || force === 'instant') ? 'auto' : 'smooth';
+
+            targetNav.scrollTo({
+                top: clamped,
+                behavior: behavior
+            });
         }
     }
 
     function revealActive(id, force) {
         var group = linksById[id] || [];
         // Сайдбар (десктоп)
-        if (group[0] && (!isSidebarHovered || force)) {
+        if (group[0] && (!isUserScrollingNav || force)) {
             revealInNav(sidebarNav, group[0], force);
         }
         // Мобильное меню (если открыто)
         if (group[1] && menu && menu.classList.contains('open')) {
             revealInNav(mobileNav, group[1], force);
         }
+    }
+
+    // Интерактивный клик по блоку «Чтение: [Глава]» для мгновенной фокусировки
+    var trackerEl = document.getElementById('sidebar-current-tracker');
+    if (trackerEl) {
+        function triggerLocateActive(e) {
+            if (e && e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+            if (e && e.type === 'keydown') e.preventDefault();
+            if (currentActiveId) {
+                isUserScrollingNav = false;
+                revealActive(currentActiveId, true);
+                var group = linksById[currentActiveId] || [];
+                if (group[0]) {
+                    group[0].classList.remove('pulse-highlight');
+                    void group[0].offsetWidth; // trigger reflow
+                    group[0].classList.add('pulse-highlight');
+                    setTimeout(function () {
+                        if (group[0]) group[0].classList.remove('pulse-highlight');
+                    }, 1300);
+                }
+            }
+        }
+        trackerEl.addEventListener('click', triggerLocateActive);
+        trackerEl.addEventListener('keydown', triggerLocateActive);
     }
 
     // Установка активного раздела в интерфейсе
