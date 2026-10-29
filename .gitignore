@@ -12,6 +12,5 @@ desktop.ini
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# AI agents workspace cache
-.agents/
+__pycache__/
+*.py[cod]
