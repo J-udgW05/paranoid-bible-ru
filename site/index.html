@@ -21566,39 +21566,48 @@ Loss Prevention) - системы, которые ловят утечку на �
     var mobileNav = document.querySelector('.mobile-menu-nav');
     var currentTrackerText = document.getElementById('sidebar-current-text');
 
-    // 2. Сбор данных структуры документа
-    var linkElements = Array.prototype.slice.call(
-        document.querySelectorAll('.sidebar-nav .nav-link, .mobile-menu-nav .nav-link')
-    );
-    if (!linkElements.length) return;
-
-    var sections = [];
-    var linksById = {};
+    // 2. Сбор данных структуры документа с явным разделением Desktop и Mobile
+    var desktopLinksById = {};
+    var mobileLinksById = {};
     var titlesById = {};
+    var sections = [];
     var seenIds = {};
 
-    linkElements.forEach(function (a) {
+    var desktopLinks = sidebarNav ? Array.prototype.slice.call(sidebarNav.querySelectorAll('.nav-link')) : [];
+    desktopLinks.forEach(function (a) {
         var href = a.getAttribute('href') || '';
         if (href.charAt(0) !== '#') return;
         var id = href.slice(1);
         if (!id) return;
 
-        if (!linksById[id]) linksById[id] = [];
-        linksById[id].push(a);
+        desktopLinksById[id] = a;
+        if (!titlesById[id]) titlesById[id] = a.textContent.trim();
 
-        if (!titlesById[id]) {
-            titlesById[id] = a.textContent.trim();
-        }
-
-        if (seenIds[id]) return;
-        seenIds[id] = true;
-
-        var secEl = document.getElementById(id);
-        if (secEl) {
-            sections.push(secEl);
+        if (!seenIds[id]) {
+            seenIds[id] = true;
+            var secEl = document.getElementById(id);
+            if (secEl) sections.push(secEl);
         }
     });
 
+    var mobileLinks = mobileNav ? Array.prototype.slice.call(mobileNav.querySelectorAll('.nav-link')) : [];
+    mobileLinks.forEach(function (a) {
+        var href = a.getAttribute('href') || '';
+        if (href.charAt(0) !== '#') return;
+        var id = href.slice(1);
+        if (!id) return;
+
+        mobileLinksById[id] = a;
+        if (!titlesById[id]) titlesById[id] = a.textContent.trim();
+
+        if (!seenIds[id]) {
+            seenIds[id] = true;
+            var secEl = document.getElementById(id);
+            if (secEl) sections.push(secEl);
+        }
+    });
+
+    var allNavLinks = desktopLinks.concat(mobileLinks);
     if (!sections.length) return;
 
     // Привязка глав к разделам
@@ -21618,14 +21627,18 @@ Loss Prevention) - системы, которые ловят утечку на �
     }
 
     var chapterHeadersById = {};
-    for (var sid in linksById) {
+    for (var sid in seenIds) {
         chapterHeadersById[sid] = [];
-        linksById[sid].forEach(function (a) {
-            var ch = findChapterHeader(a);
-            if (ch && chapterHeadersById[sid].indexOf(ch) === -1) {
-                chapterHeadersById[sid].push(ch);
-            }
-        });
+        var dEl = desktopLinksById[sid];
+        var mEl = mobileLinksById[sid];
+        if (dEl) {
+            var chD = findChapterHeader(dEl);
+            if (chD && chapterHeadersById[sid].indexOf(chD) === -1) chapterHeadersById[sid].push(chD);
+        }
+        if (mEl) {
+            var chM = findChapterHeader(mEl);
+            if (chM && chapterHeadersById[sid].indexOf(chM) === -1) chapterHeadersById[sid].push(chM);
+        }
     }
 
     // Состояние навигации
@@ -21661,10 +21674,10 @@ Loss Prevention) - системы, которые ловят утечку на �
         if (!targetNav || !linkEl) return;
         if (targetNav.scrollHeight <= targetNav.clientHeight + 4) return;
 
-        // Точное инвариантное вычисление вертикальной позиции внутри контейнера
+        // Точное инвариантное вычисление вертикальной позиции внутри целевого контейнера
         var navRect = targetNav.getBoundingClientRect();
         var linkRect = linkEl.getBoundingClientRect();
-        var linkTop = linkRect.top - navRect.top + targetNav.scrollTop;
+        var exactTop = linkRect.top - navRect.top + targetNav.scrollTop;
         var linkHeight = linkEl.offsetHeight || 32;
 
         var navScrollTop = targetNav.scrollTop;
@@ -21674,9 +21687,9 @@ Loss Prevention) - системы, которые ловят утечку на �
         var comfortTop = navScrollTop + (navClientHeight * 0.25);
         var comfortBottom = navScrollTop + navClientHeight - (navClientHeight * 0.25) - linkHeight;
 
-        // Если принудительно (клик по трекеру/якорю) или ссылка вышла за пределы комфортной зоны
-        if (force || linkTop < comfortTop || linkTop > comfortBottom) {
-            var targetCenter = linkTop - (navClientHeight / 2) + (linkHeight / 2);
+        // Если принудительно (клик по кнопке «Чтение») или ссылка вышла за зону комфорта
+        if (force || exactTop < comfortTop || exactTop > comfortBottom) {
+            var targetCenter = exactTop - (navClientHeight / 2) + (linkHeight / 2);
             var maxScroll = targetNav.scrollHeight - navClientHeight;
             var clamped = Math.max(0, Math.min(maxScroll, targetCenter));
 
@@ -21691,35 +21704,46 @@ Loss Prevention) - системы, которые ловят утечку на �
     }
 
     function revealActive(id, force) {
-        var group = linksById[id] || [];
-        // Сайдбар (десктоп)
-        if (group[0] && (!isUserScrollingNav || force)) {
-            revealInNav(sidebarNav, group[0], force);
+        if (!id) return;
+        // 1. Сайдбар (десктоп) - используем строго desktopLinksById[id]
+        var dLink = desktopLinksById[id];
+        if (dLink && sidebarNav && (!isUserScrollingNav || force)) {
+            revealInNav(sidebarNav, dLink, force);
         }
-        // Мобильное меню (если открыто)
-        if (group[1] && menu && menu.classList.contains('open')) {
-            revealInNav(mobileNav, group[1], force);
+        // 2. Мобильное меню (если открыто) - используем строго mobileLinksById[id]
+        var mLink = mobileLinksById[id];
+        if (mLink && mobileNav && menu && menu.classList.contains('open') && (!isUserScrollingNav || force)) {
+            revealInNav(mobileNav, mLink, force);
         }
     }
 
-    // Интерактивный клик по блоку «Чтение: [Глава]» для мгновенной фокусировки
+    // Интерактивный клик по кнопке «Чтение: [Глава]» для мгновенной центровки текущей главы
     var trackerEl = document.getElementById('sidebar-current-tracker');
     if (trackerEl) {
         function triggerLocateActive(e) {
             if (e && e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
-            if (e && e.type === 'keydown') e.preventDefault();
-            if (currentActiveId) {
-                isUserScrollingNav = false;
-                revealActive(currentActiveId, true);
-                var group = linksById[currentActiveId] || [];
-                if (group[0]) {
-                    group[0].classList.remove('pulse-highlight');
-                    void group[0].offsetWidth; // trigger reflow
-                    group[0].classList.add('pulse-highlight');
-                    setTimeout(function () {
-                        if (group[0]) group[0].classList.remove('pulse-highlight');
-                    }, 1300);
+            if (e && e.type === 'keydown') {
+                e.preventDefault();
+            }
+            var targetId = currentActiveId;
+            if (!targetId || !desktopLinksById[targetId]) {
+                if (window.location.hash && desktopLinksById[window.location.hash.slice(1)]) {
+                    targetId = window.location.hash.slice(1);
+                } else if (sections.length > 0) {
+                    targetId = sections[0].id;
                 }
+            }
+            if (targetId && desktopLinksById[targetId]) {
+                isUserScrollingNav = false;
+                clearTimeout(userScrollTimer);
+                var dLink = desktopLinksById[targetId];
+                revealInNav(sidebarNav, dLink, true);
+                dLink.classList.remove('pulse-highlight');
+                void dLink.offsetWidth; // trigger reflow
+                dLink.classList.add('pulse-highlight');
+                setTimeout(function () {
+                    dLink.classList.remove('pulse-highlight');
+                }, 1300);
             }
         }
         trackerEl.addEventListener('click', triggerLocateActive);
@@ -21732,13 +21756,13 @@ Loss Prevention) - системы, которые ловят утечку на �
         currentActiveId = id;
 
         // 1. Подсветка ссылок в оглавлении
-        for (var i = 0; i < linkElements.length; i++) {
-            var isCurrent = (linkElements[i].getAttribute('href') === '#' + id);
-            linkElements[i].classList.toggle('active', isCurrent);
+        for (var i = 0; i < allNavLinks.length; i++) {
+            var isCurrent = (allNavLinks[i].getAttribute('href') === '#' + id);
+            allNavLinks[i].classList.toggle('active', isCurrent);
             if (isCurrent) {
-                linkElements[i].setAttribute('aria-current', 'true');
+                allNavLinks[i].setAttribute('aria-current', 'true');
             } else {
-                linkElements[i].removeAttribute('aria-current');
+                allNavLinks[i].removeAttribute('aria-current');
             }
         }
 
